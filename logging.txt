@@ -1,0 +1,20 @@
+## regex expressions designed to change logging statements from using string concatenation to using the slf4j "{}" syntax. This way you can code whatever way is easiest then clean up afterwards.
+
+# Concatenates strings that are split up (over multiple lines).
+LOGGER\.([^(]+)\("(.*)"(?:\s)*?\+(?:\s)*?"([^;]+?)\);
+LOGGER.$1("$2$3);
+
+# Handles a variable at the start of a logging statement.
+LOGGER\.([^(]+)\(([^"]+?)(?:\s)*?\+(?:\s)*?"([^;]*?)\);
+LOGGER.$1("{}$3, $2);
+
+# Handles the first occuring variable in the middle of a logging statement. Run multiple times.
+LOGGER\.([^(]+)\("([^"]*)"(?:\s)*?\+(?:\s)*?([^"]+?)(?:\s)*?\+(?:\s)*?"([^;]*?)\);
+LOGGER.$1("$2{}$4, $3);
+
+# Handles a variable at the end of a logging statement.
+LOGGER\.([^(]+)\("([^"]*)"(?:\s)*?\+(?:\s)*?([^",;]+)([^";]*?)\);
+LOGGER.$1("$2{}"$4, $3);
+
+# Find long logs that you might want to split up again to multiple lines (100+ characters).
+LOGGER\.([^(]+)\([^;]{100}[^;]*\);
